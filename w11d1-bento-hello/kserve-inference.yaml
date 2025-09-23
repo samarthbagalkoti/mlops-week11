@@ -1,0 +1,23 @@
+apiVersion: serving.kserve.io/v1beta1
+kind: InferenceService
+metadata:
+  name: iris-bento
+  namespace: ml
+spec:
+  predictor:
+    # Using a custom container with your Bento image
+    containers:
+      - name: user-container
+        image: "<ECR_IMAGE_URI>"   # e.g., 123456789012.dkr.ecr.us-east-1.amazonaws.com/iris-svc:latest
+        ports:
+          - containerPort: 3000
+        readinessProbe:
+          httpGet:
+            path: /healthz
+            port: 3000
+          initialDelaySeconds: 5
+          periodSeconds: 5
+    # Optional autoscaling hints (effective once Knative is in place)
+    minReplicas: 0
+    maxReplicas: 3
+
