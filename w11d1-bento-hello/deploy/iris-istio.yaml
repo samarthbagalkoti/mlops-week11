@@ -1,0 +1,19 @@
+# deploy/iris-istio.yaml  (adjust hosts/gateway as per your setup)
+apiVersion: networking.istio.io/v1beta1
+kind: VirtualService
+metadata:
+  name: iris-bento
+  namespace: ml
+spec:
+  hosts: ["*"]
+  gateways: ["istio-system/ingressgateway"]   # or your gateway name
+  http:
+    - match:
+        - uri: { prefix: "/iris" }
+      rewrite:
+        uri: "/"
+      route:
+        - destination:
+            host: iris-bento.ml.svc.cluster.local
+            port: { number: 80 }
+

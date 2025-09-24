@@ -1,3 +1,4 @@
+# kserve/iris-inference.yaml
 apiVersion: serving.kserve.io/v1beta1
 kind: InferenceService
 metadata:
@@ -24,6 +25,10 @@ spec:
           initialDelaySeconds: 5
           periodSeconds: 5
         resources:
-          requests: { cpu: "100m", memory: "256Mi" }
-          limits:   { cpu: "1",    memory: "1Gi" }
+          requests:
+            cpu: "100m"
+            memory: "256Mi"
+          limits:
+            cpu: "1"
+            memory: "1Gi"
 

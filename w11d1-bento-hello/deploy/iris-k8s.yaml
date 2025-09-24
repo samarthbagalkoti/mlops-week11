@@ -1,0 +1,65 @@
+apiVersion: v1
+kind: Namespace
+metadata:
+  name: ml
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: iris-bento
+  namespace: ml
+  labels: { app: iris-bento }
+spec:
+  replicas: 1
+  selector: { matchLabels: { app: iris-bento } }
+  template:
+    metadata:
+      labels: { app: iris-bento }
+    spec:
+      containers:
+        - name: user-container
+          image: 014498620948.dkr.ecr.us-east-1.amazonaws.com/w11d1_bento_hello:latest
+          ports:
+            - containerPort: 3000
+          readinessProbe:
+            httpGet: { path: /healthz, port: 3000 }
+            initialDelaySeconds: 5
+            periodSeconds: 5
+          resources:
+            requests: { cpu: "100m", memory: "256Mi" }
+            limits:   { cpu: "1",    memory: "1Gi" }
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: iris-bento
+  namespace: ml
+spec:
+  selector: { app: iris-bento }
+  ports:
+    - name: http
+      port: 80
+      targetPort: 3000
+  type: ClusterIP
+---
+# Horizontal autoscaling (CPU-based; adjust as you like)
+apiVersion: autoscaling/v2
+kind: HorizontalPodAutoscaler
+metadata:
+  name: iris-bento
+  namespace: ml
+spec:
+  scaleTargetRef:
+    apiVersion: apps/v1
+    kind: Deployment
+    name: iris-bento
+  minReplicas: 1
+  maxReplicas: 3
+  metrics:
+    - type: Resource
+      resource:
+        name: cpu
+        target:
+          type: Utilization
+          averageUtilization: 70
+
